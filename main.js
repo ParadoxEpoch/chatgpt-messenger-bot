@@ -73,30 +73,56 @@ app.post('/webhook/', async function (req, res) {
         let sender = event.sender.id;
         if (event.message && event.message.text && !event.message.app_id) {
             await sendTypingIndicator(sender, true);
-            let text = event.message.text;
-            const gptResponse = await sendToGpt(text);
-            // ? Seems like we don't need to reset the typing indicator since Meta does it after sending a message anyway
-            //await sendTypingIndicator(sender, false);
+
+            // If the user sent the "reset" command, reset the instance
+            if (event.message.text === '/reset' || event.message.text === '/newtopic') {
+                parentMessageId = undefined;
+                sendTextMessage(sender, 'Done, my brain is reset. Ask me anything!');
+                return res.sendStatus(200);
+            }
+
+            // If the user sent the "personality" command, init a new custom instance
+            /* if (event.message.text === '/personality') {
+                parentMessageId = undefined;
+                sendTextMessage(sender, 'Done, my brain is reset. Ask me anything!');
+                return res.sendStatus(200);
+            } */
+
+            const gptResponse = await sendToGpt(event.message.text);
             sendTextMessage(sender, gptResponse);
         }
     }
     res.sendStatus(200);
 });
 
+/* const sessionState = {} */
+
+let parentMessageId = undefined;
+
+const api = new ChatGPTAPI({
+    apiKey: process.env.openaiKey,
+    //systemMessage: personalities.hostile.systemMessage
+})
+
 async function sendToGpt(prompt) {
-    // TODO: We shouldn't be creating a new ChatGPTAPI instance every time we send a message. Either instantiate globally or per-user.
-    const api = new ChatGPTAPI({
-        apiKey: process.env.openaiKey
-    })
+
+    console.log('About to send message to ChatGPT using parentMessageId: ' + parentMessageId);
 
     console.log('Prompt: ' + prompt);
     const res = await api.sendMessage(prompt, {
+        parentMessageId: parentMessageId,
+
         // TODO: I don't think Facebook supports partial messages so handling onProgress to update the response status is pointless, but this would be useful for a Discord bot...
-        onProgress: (partialResponse) => {
+        /* onProgress: (partialResponse) => {
             console.log(partialResponse.text)
-        }
+        } */
     });
+
+    // Set parentMessageId so we can remember the current conversation
+    parentMessageId = res.id;
+
     console.log(res);
     console.log(res.text);
+
     return res.text;
 }
