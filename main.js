@@ -75,7 +75,8 @@ app.post('/webhook/', async function (req, res) {
             await sendTypingIndicator(sender, true);
             let text = event.message.text;
             const gptResponse = await sendToGpt(text);
-            await sendTypingIndicator(sender, true);
+            // ? Seems like we don't need to reset the typing indicator since Meta does it after sending a message anyway
+            //await sendTypingIndicator(sender, false);
             sendTextMessage(sender, gptResponse);
         }
     }
