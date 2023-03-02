@@ -15,7 +15,7 @@ app.listen(3000);
 // Facebook Page Access Token
 let token = process.env.fbPageToken;
 
-// Root route. Good for checking bot status.
+// Root route. Useful for checking bot status.
 app.get('/', function (req, res) {
     res.send('GPTBot is running!');
 });
@@ -77,19 +77,20 @@ app.post('/webhook/', async function (req, res) {
             const gptResponse = await sendToGpt(text);
             await sendTypingIndicator(sender, true);
             sendTextMessage(sender, gptResponse);
-            //sendTextMessage(sender, "Text received! Echo: " + text.substring(0, 200));
         }
     }
     res.sendStatus(200);
 });
 
 async function sendToGpt(prompt) {
+    // TODO: We shouldn't be creating a new ChatGPTAPI instance every time we send a message. Either instantiate globally or per-user.
     const api = new ChatGPTAPI({
         apiKey: process.env.openaiKey
     })
 
     console.log('Prompt: ' + prompt);
     const res = await api.sendMessage(prompt, {
+        // TODO: I don't think Facebook supports partial messages so handling onProgress to update the response status is pointless, but this would be useful for a Discord bot...
         onProgress: (partialResponse) => {
             console.log(partialResponse.text)
         }
