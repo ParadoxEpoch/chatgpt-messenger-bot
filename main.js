@@ -67,7 +67,9 @@ async function sendTypingIndicator(sender, typingState) {
     name: "Maria"
 }); */
 
-const chatbot = new Persona();
+// * Super simple in-memory database
+// TODO: Implement a proper in-memory db like Redis to support multiple Node processes
+const instanceDb = {};
 
 // Handle incoming messages
 app.post('/webhook/', async function (req, res) {
@@ -77,6 +79,13 @@ app.post('/webhook/', async function (req, res) {
         let sender = event.sender.id;
         if (event.message && event.message.text && !event.message.app_id) {
 
+            // If the user doesn't already have an active instance in the instanceDb, create one now
+            if (!instanceDb[sender]) instanceDb[sender] = new Persona();
+
+            // Define chatbot as the sending user's persona instance in the instanceDb
+            const chatbot = instanceDb[sender];
+
+            // Send a typing indicator to the messenger chat
             await sendTypingIndicator(sender, true);
 
             // ! We need to handle "commands" better than... this
