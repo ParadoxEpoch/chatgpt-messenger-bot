@@ -48,6 +48,9 @@ export default class Persona {
         // If the user chose to give the instance a name, append it to the base prompt
         if (options.name) basePrompt += `Your name is ${options.name}. `;
 
+        // If the user chose to give the instance an occupation, append it to the base prompt
+        if (options.occupation) basePrompt += `Your occupation is that of a ${options.occupation}. `;
+
         // Append the personality primer to the base prompt
         basePrompt += personalities[personaName].systemMessage + `\n`;
 
