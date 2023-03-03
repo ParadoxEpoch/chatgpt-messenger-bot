@@ -97,6 +97,14 @@ app.post('/webhook/', async function (req, res) {
                 return res.sendStatus(200);
             } */
 
+            // If the user sent the "rewind" command, we can rewind the chat by the number of turns provided
+            if (event.message.text.startsWith('/bot:rewind ')) {
+                const turnsToRewind = parseInt(event.message.text.split(' ')[1]);
+                if (isNaN(turnsToRewind)) throw new Error('The rewind command requires a valid integer with the number of turns to rewind');
+                sendTextMessage(sender, await chatbot.rewind(turnsToRewind));
+                return res.sendStatus(200);
+            }
+
             const gptResponse = await chatbot.sendMessage(event.message.text);
             sendTextMessage(sender, gptResponse);
         }

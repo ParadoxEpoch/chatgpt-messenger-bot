@@ -85,6 +85,21 @@ export default class Persona {
 
     }
 
+    async rewind(turns) {
+
+        console.log('Current array length: ' + this._messageHistory.length);
+
+        // Adjust the length of the messageHistory array to the current length minus the number of turns to rewind
+        const newLength = this._messageHistory.length - turns;
+        if (newLength < 1) throw new Error(`You can't rewind ${turns} turns since there are only ${this._messageHistory.length} turns in the conversation.`);
+        this._messageHistory.length = newLength;
+
+        console.log('New array length: ' + this._messageHistory.length);
+
+        return `No worries, we'll keep talking from this point:\n\n` + this._messageHistory[this._messageHistory.length - 1].text;
+
+    }
+
     async reset() {
         this._messageHistory = [];
         return `Done, my memory's been wiped. Let's start a new conversation!`
