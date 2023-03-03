@@ -54,6 +54,9 @@ export default class Persona {
         // Append the personality primer to the base prompt
         basePrompt += personalities[personaName].systemMessage + `\n`;
 
+        // If the includeDate option is true, append the current date to the base prompt
+        if (options.includeDate) basePrompt += `Current date: ${new Date().toISOString()}\n`;
+
         // Pad the base prompt with an extra new line where we'll append the user's prompt
         basePrompt += `\n`;
 
