@@ -89,7 +89,23 @@ app.post('/webhook/', async function (req, res) {
             await sendTypingIndicator(sender, true);
 
             // ! We need to handle "commands" better than... this
-            // TODO: Add /system commands and find a better home for them outside the webhook route handler!
+            // TODO: Find a better home for commands outside the webhook route handler!
+
+            // If the user sent the "new" command, trash the current instance and create a new one
+            if (event.message.text.startsWith('/bot:new')) {
+
+                const newPersona = event.message.text.split(' ')[1] || 'default';
+
+                try {
+                    instanceDb[sender] = new Persona(newPersona);
+                    sendTextMessage(sender, `A new bot with the "${newPersona}" personality has been generated. Say hi! 👋`);
+                } catch(err) {
+                    sendTextMessage(sender, 'Failed to create a new bot: ' + err.message);
+                }
+                
+                return res.sendStatus(200);
+                
+            }
 
             // If the user sent the "reset" command, reset the instance
             if (event.message.text === '/bot:reset' || event.message.text === '/bot:newtopic') {
@@ -108,12 +124,6 @@ app.post('/webhook/', async function (req, res) {
                 sendTextMessage(sender, await chatbot.func(event.message.text.split(' ')[1]));
                 return res.sendStatus(200);
             }
-
-            // If the user sent the "persona" command, init a new custom instance
-            /* if (event.message.text === '/bot:persona') {
-                sendTextMessage(sender, 'Not implemented');
-                return res.sendStatus(200);
-            } */
 
             // If the user sent the "rewind" command, we can rewind the chat by the number of turns provided
             if (event.message.text.startsWith('/bot:rewind ')) {
