@@ -108,7 +108,7 @@ app.post('/webhook/', async function (req, res) {
             }
 
             // If the user sent the "reset" command, reset the instance
-            if (event.message.text === '/bot:reset' || event.message.text === '/bot:newtopic') {
+            if (event.message.text === '/bot:reset') {
                 sendTextMessage(sender, await chatbot.reset());
                 return res.sendStatus(200);
             }
