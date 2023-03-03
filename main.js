@@ -52,13 +52,11 @@ async function sendTextMessage(sender, text) {
 // Send indicator that a message is being typed
 async function sendTypingIndicator(sender, typingState) {
 
-    const requestData = {
-        recipient: {id: sender},
-        sender_action: typingState ? "typing_on" : "typing_off",
-    };
-
     try {
-        await axios.post(`https://graph.facebook.com/v16.0/me/messages?access_token=${token}`, requestData);
+        await axios.post(`https://graph.facebook.com/v16.0/me/messages?access_token=${token}`, {
+            recipient: {id: sender},
+            sender_action: typingState ? "typing_on" : "typing_off",
+        });
     } catch (error) {
         console.error('Error sending typing indicator:', error);
     }
@@ -88,6 +86,8 @@ app.post('/webhook/', async function (req, res) {
             if (event.message.text === '/bot:reset' || event.message.text === '/bot:newtopic') {
                 sendTextMessage(sender, await chatbot.reset());
                 return res.sendStatus(200);
+            }
+
             // If the user sent the "debug" command, output the Persona's state as a stringified JSON object
             if (event.message.text.startsWith('/bot:debug ')) {
                 sendTextMessage(sender, await chatbot.debug(event.message.text.split(' ')[1]));
