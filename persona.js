@@ -105,4 +105,42 @@ export default class Persona {
         return `Done, my memory's been wiped. Let's start a new conversation!`
     }
 
+    // * For debugging.
+    async debug(param) {
+        switch(param) {
+            case 'messageHistory':
+                return JSON.stringify(this._messageHistory);
+            case 'tokens':
+                const tokens = {
+                    completion: 0,
+                    prompt: 0,
+                    total: 0
+                };
+
+                this._messageHistory.forEach(msg => {
+                    const usage = msg.detail.usage;
+                    tokens.completion += usage.completion_tokens;
+                    tokens.prompt += usage.prompt_tokens;
+                    tokens.total += usage.total_tokens;
+                });
+                
+                // Price per token for the gpt-3.5-turbo model
+                const tokenPrice = 0.000002;
+
+                // Calculate total cost and round to 5 decimal places
+                const totalCost = Math.round((tokenPrice * tokens.total) * 100000) / 100000;
+
+                return `So far we've used ${tokens.total} tokens for this conversation.\n\nThis is made up of ${tokens.prompt} tokens for prompts and ${tokens.completion} tokens for completions.\n\nAt the current price, this chat has cost $${totalCost} in API credits.`;
+            default:
+                // If the param arg doesn't match a condition, fallback to a message letting the user know
+                return `"${param}" is not a valid argument for the debug command.`
+        }
+    }
+
+    // * For debugging. Manually call a function within the current Persona instance
+    async func(func) {
+        if (func === 'func') return `I can't run the "func" function on my instance since that would cause an infinitely recursive loop!`
+        return typeof this[func] === 'function' ? await this[func]() : `That function doesn't exist on my instance!`;
+    }
+
 }

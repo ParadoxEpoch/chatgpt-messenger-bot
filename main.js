@@ -88,6 +88,15 @@ app.post('/webhook/', async function (req, res) {
             if (event.message.text === '/bot:reset' || event.message.text === '/bot:newtopic') {
                 sendTextMessage(sender, await chatbot.reset());
                 return res.sendStatus(200);
+            // If the user sent the "debug" command, output the Persona's state as a stringified JSON object
+            if (event.message.text.startsWith('/bot:debug ')) {
+                sendTextMessage(sender, await chatbot.debug(event.message.text.split(' ')[1]));
+                return res.sendStatus(200);
+            }
+
+            // If the user sent the "func" command, execute the specified function in the current instance
+            if (event.message.text.startsWith('/bot:func ')) {
+                sendTextMessage(sender, await chatbot.func(event.message.text.split(' ')[1]));
                 return res.sendStatus(200);
             }
 
